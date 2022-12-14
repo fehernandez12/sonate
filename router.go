@@ -499,7 +499,7 @@ func uniqueVars(s1, s2 []string) error {
 	for _, v1 := range s1 {
 		for _, v2 := range s2 {
 			if v1 == v2 {
-				return fmt.Errorf("mux: duplicated route variable %q", v2)
+				return fmt.Errorf("sonate: duplicated route variable %q", v2)
 			}
 		}
 	}
@@ -512,7 +512,7 @@ func checkPairs(pairs ...string) (int, error) {
 	length := len(pairs)
 	if length%2 != 0 {
 		return length, fmt.Errorf(
-			"mux: number of parameters must be multiple of 2, got %v", pairs)
+			"sonate: number of parameters must be multiple of 2, got %v", pairs)
 	}
 	return length, nil
 }
@@ -570,7 +570,7 @@ func matchMapWithString(toCheck map[string]string, toMatch map[string][]string, 
 			return false
 		} else if v != "" {
 			// If value was defined as an empty string we only check that the
-			// key exists. Otherwise we also check for equality.
+			// key exists. Otherwise, we also check for equality.
 			valueExists := false
 			for _, value := range values {
 				if v == value {

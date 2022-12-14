@@ -1753,7 +1753,7 @@ func TestSubrouterErrorHandling(t *testing.T) {
 	}
 }
 
-// See: https://github.com/gorilla/mux/issues/200
+// See: https://github.com/gorilla/sonate/issues/200
 func TestPanicOnCapturingGroups(t *testing.T) {
 	defer func() {
 		if recover() == nil {
