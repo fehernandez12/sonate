@@ -307,6 +307,41 @@ func (r *Router) Methods(methods ...string) *Route {
 	return r.NewRoute().Methods(methods...)
 }
 
+// GET is a shortcut for router.NewRoute().Methods(http.MethodGet)
+func (r *Router) GET() *Route {
+	return r.NewRoute().Methods(http.MethodGet)
+}
+
+// POST is a shortcut for router.NewRoute().Methods(http.MethodPost)
+func (r *Router) POST() *Route {
+	return r.NewRoute().Methods(http.MethodPost)
+}
+
+// PUT is a shortcut for router.NewRoute().Methods(http.MethodPut)
+func (r *Router) PUT() *Route {
+	return r.NewRoute().Methods(http.MethodPut)
+}
+
+// PATCH is a shortcut for router.NewRoute().Methods(http.MethodPatch)
+func (r *Router) PATCH() *Route {
+	return r.NewRoute().Methods(http.MethodPatch)
+}
+
+// DELETE is a shortcut for router.NewRoute().Methods(http.MethodDelete)
+func (r *Router) DELETE() *Route {
+	return r.NewRoute().Methods(http.MethodDelete)
+}
+
+// OPTIONS is a shortcut for router.NewRoute().Methods(http.MethodOptions)
+func (r *Router) OPTIONS() *Route {
+	return r.NewRoute().Methods(http.MethodOptions)
+}
+
+// HEAD is a shortcut for router.NewRoute().Methods(http.MethodHead)
+func (r *Router) HEAD() *Route {
+	return r.NewRoute().Methods(http.MethodHead)
+}
+
 // Path registers a new route with a matcher for the URL path.
 // See Route.Path().
 func (r *Router) Path(tpl string) *Route {
@@ -464,7 +499,7 @@ func uniqueVars(s1, s2 []string) error {
 	for _, v1 := range s1 {
 		for _, v2 := range s2 {
 			if v1 == v2 {
-				return fmt.Errorf("mux: duplicated route variable %q", v2)
+				return fmt.Errorf("sonate: duplicated route variable %q", v2)
 			}
 		}
 	}
@@ -477,7 +512,7 @@ func checkPairs(pairs ...string) (int, error) {
 	length := len(pairs)
 	if length%2 != 0 {
 		return length, fmt.Errorf(
-			"mux: number of parameters must be multiple of 2, got %v", pairs)
+			"sonate: number of parameters must be multiple of 2, got %v", pairs)
 	}
 	return length, nil
 }
@@ -535,7 +570,7 @@ func matchMapWithString(toCheck map[string]string, toMatch map[string][]string, 
 			return false
 		} else if v != "" {
 			// If value was defined as an empty string we only check that the
-			// key exists. Otherwise we also check for equality.
+			// key exists. Otherwise, we also check for equality.
 			valueExists := false
 			for _, value := range values {
 				if v == value {

@@ -78,7 +78,7 @@ func newRouteRegexp(tpl string, typ regexpType, options routeRegexpOptions) (*ro
 		}
 		// Name or pattern can't be empty.
 		if name == "" || patt == "" {
-			return nil, fmt.Errorf("mux: missing name or pattern in %q",
+			return nil, fmt.Errorf("sonate: missing name or pattern in %q",
 				tpl[idxs[i]:end])
 		}
 		// Build the regexp pattern.
@@ -195,7 +195,7 @@ func (r *routeRegexp) url(values map[string]string) (string, error) {
 	for k, v := range r.varsN {
 		value, ok := values[v]
 		if !ok {
-			return "", fmt.Errorf("mux: missing route variable %q", v)
+			return "", fmt.Errorf("sonate: missing route variable %q", v)
 		}
 		if r.regexpType == regexpTypeQuery {
 			value = url.QueryEscape(value)
@@ -210,7 +210,7 @@ func (r *routeRegexp) url(values map[string]string) (string, error) {
 		for k, v := range r.varsN {
 			if !r.varsR[k].MatchString(values[v]) {
 				return "", fmt.Errorf(
-					"mux: variable %q doesn't match, expected %q", values[v],
+					"sonate: variable %q doesn't match, expected %q", values[v],
 					r.varsR[k].String())
 			}
 		}
@@ -290,12 +290,12 @@ func braceIndices(s string) ([]int, error) {
 			if level--; level == 0 {
 				idxs = append(idxs, idx, i+1)
 			} else if level < 0 {
-				return nil, fmt.Errorf("mux: unbalanced braces in %q", s)
+				return nil, fmt.Errorf("sonate: unbalanced braces in %q", s)
 			}
 		}
 	}
 	if level != 0 {
-		return nil, fmt.Errorf("mux: unbalanced braces in %q", s)
+		return nil, fmt.Errorf("sonate: unbalanced braces in %q", s)
 	}
 	return idxs, nil
 }

@@ -134,7 +134,7 @@ func (r *Route) GetHandler() http.Handler {
 // It is an error to call Name more than once on a route.
 func (r *Route) Name(name string) *Route {
 	if r.name != "" {
-		r.err = fmt.Errorf("mux: route already has name %q, can't set %q",
+		r.err = fmt.Errorf("sonate: route already has name %q, can't set %q",
 			r.name, name)
 	}
 	if r.err == nil {
@@ -173,7 +173,7 @@ func (r *Route) addRegexpMatcher(tpl string, typ regexpType) error {
 	}
 	if typ == regexpTypePath || typ == regexpTypePrefix {
 		if len(tpl) > 0 && tpl[0] != '/' {
-			return fmt.Errorf("mux: path must start with a slash, got %q", tpl)
+			return fmt.Errorf("sonate: path must start with a slash, got %q", tpl)
 		}
 		if r.regexp.path != nil {
 			tpl = strings.TrimRight(r.regexp.path.template, "/") + tpl
@@ -226,7 +226,7 @@ func (m headerMatcher) Match(r *http.Request, match *RouteMatch) bool {
 // Headers adds a matcher for request header values.
 // It accepts a sequence of key/value pairs to be matched. For example:
 //
-//	r := mux.NewRouter()
+//	r := sonate.NewRouter()
 //	r.Headers("Content-Type", "application/json",
 //	          "X-Requested-With", "XMLHttpRequest")
 //
@@ -251,7 +251,7 @@ func (m headerRegexMatcher) Match(r *http.Request, match *RouteMatch) bool {
 // HeadersRegexp accepts a sequence of key/value pairs, where the value has regex
 // support. For example:
 //
-//	r := mux.NewRouter()
+//	r := sonate.NewRouter()
 //	r.HeadersRegexp("Content-Type", "application/(text|json)",
 //	          "X-Requested-With", "XMLHttpRequest")
 //
@@ -279,13 +279,13 @@ func (r *Route) HeadersRegexp(pairs ...string) *Route {
 //
 // For example:
 //
-//	r := mux.NewRouter()
+//	r := sonate.NewRouter()
 //	r.Host("www.example.com")
 //	r.Host("{subdomain}.domain.com")
 //	r.Host("{subdomain:[a-z]+}.domain.com")
 //
 // Variable names must be unique in a given route. They can be retrieved
-// calling mux.Vars(request).
+// calling sonate.Vars(request).
 func (r *Route) Host(tpl string) *Route {
 	r.err = r.addRegexpMatcher(tpl, regexpTypeHost)
 	return r
@@ -338,14 +338,14 @@ func (r *Route) Methods(methods ...string) *Route {
 //
 // For example:
 //
-//	r := mux.NewRouter()
+//	r := sonate.NewRouter()
 //	r.Path("/products/").Handler(ProductsHandler)
 //	r.Path("/products/{key}").Handler(ProductsHandler)
 //	r.Path("/articles/{category}/{id:[0-9]+}").
 //	  Handler(ArticleHandler)
 //
 // Variable names must be unique in a given route. They can be retrieved
-// calling mux.Vars(request).
+// calling sonate.Vars(request).
 func (r *Route) Path(tpl string) *Route {
 	r.err = r.addRegexpMatcher(tpl, regexpTypePath)
 	return r
@@ -373,7 +373,7 @@ func (r *Route) PathPrefix(tpl string) *Route {
 // It accepts a sequence of key/value pairs. Values may define variables.
 // For example:
 //
-//	r := mux.NewRouter()
+//	r := sonate.NewRouter()
 //	r.Queries("foo", "bar", "id", "{id:[0-9]+}")
 //
 // The above route will only match if the URL contains the defined queries
@@ -390,7 +390,7 @@ func (r *Route) Queries(pairs ...string) *Route {
 	length := len(pairs)
 	if length%2 != 0 {
 		r.err = fmt.Errorf(
-			"mux: number of parameters must be multiple of 2, got %v", pairs)
+			"sonate: number of parameters must be multiple of 2, got %v", pairs)
 		return nil
 	}
 	for i := 0; i < length; i += 2 {
@@ -412,7 +412,7 @@ func (m schemeMatcher) Match(r *http.Request, match *RouteMatch) bool {
 	// https://golang.org/pkg/net/http/#Request
 	// "For [most] server requests, fields other than Path and RawQuery will be
 	// empty."
-	// Since we're an http muxer, the scheme is either going to be http or https
+	// Since we're an http sonateer, the scheme is either going to be http or https
 	// though, so we can just set it based on the tls termination state.
 	if scheme == "" {
 		if r.TLS == nil {
@@ -469,7 +469,7 @@ func (r *Route) BuildVarsFunc(f BuildVarsFunc) *Route {
 //
 // It will test the inner routes only if the parent route matched. For example:
 //
-//	r := mux.NewRouter()
+//	r := sonate.NewRouter()
 //	s := r.Host("www.example.com").Subrouter()
 //	s.HandleFunc("/products/", ProductsHandler)
 //	s.HandleFunc("/products/{key}", ProductHandler)
@@ -493,7 +493,7 @@ func (r *Route) Subrouter() *Router {
 // It accepts a sequence of key/value pairs for the route variables. For
 // example, given this route:
 //
-//	r := mux.NewRouter()
+//	r := sonate.NewRouter()
 //	r.HandleFunc("/articles/{category}/{id:[0-9]+}", ArticleHandler).
 //	  Name("article")
 //
@@ -507,7 +507,7 @@ func (r *Route) Subrouter() *Router {
 //
 // This also works for host variables:
 //
-//	r := mux.NewRouter()
+//	r := sonate.NewRouter()
 //	r.HandleFunc("/articles/{category}/{id:[0-9]+}", ArticleHandler).
 //	  Host("{subdomain}.domain.com").
 //	  Name("article")
@@ -520,7 +520,7 @@ func (r *Route) Subrouter() *Router {
 // The scheme of the resulting url will be the first argument that was passed to Schemes:
 //
 //	// url.String() will be "https://example.com"
-//	r := mux.NewRouter()
+//	r := sonate.NewRouter()
 //	url, err := r.Host("example.com")
 //	             .Schemes("https", "http").URL()
 //
@@ -573,7 +573,7 @@ func (r *Route) URLHost(pairs ...string) (*url.URL, error) {
 		return nil, r.err
 	}
 	if r.regexp.host == nil {
-		return nil, errors.New("mux: route doesn't have a host")
+		return nil, errors.New("sonate: route doesn't have a host")
 	}
 	values, err := r.prepareVars(pairs...)
 	if err != nil {
@@ -601,7 +601,7 @@ func (r *Route) URLPath(pairs ...string) (*url.URL, error) {
 		return nil, r.err
 	}
 	if r.regexp.path == nil {
-		return nil, errors.New("mux: route doesn't have a path")
+		return nil, errors.New("sonate: route doesn't have a path")
 	}
 	values, err := r.prepareVars(pairs...)
 	if err != nil {
@@ -626,7 +626,7 @@ func (r *Route) GetPathTemplate() (string, error) {
 		return "", r.err
 	}
 	if r.regexp.path == nil {
-		return "", errors.New("mux: route doesn't have a path")
+		return "", errors.New("sonate: route doesn't have a path")
 	}
 	return r.regexp.path.template, nil
 }
@@ -640,7 +640,7 @@ func (r *Route) GetPathRegexp() (string, error) {
 		return "", r.err
 	}
 	if r.regexp.path == nil {
-		return "", errors.New("mux: route does not have a path")
+		return "", errors.New("sonate: route does not have a path")
 	}
 	return r.regexp.path.regexp.String(), nil
 }
@@ -655,7 +655,7 @@ func (r *Route) GetQueriesRegexp() ([]string, error) {
 		return nil, r.err
 	}
 	if r.regexp.queries == nil {
-		return nil, errors.New("mux: route doesn't have queries")
+		return nil, errors.New("sonate: route doesn't have queries")
 	}
 	queries := make([]string, 0, len(r.regexp.queries))
 	for _, query := range r.regexp.queries {
@@ -674,7 +674,7 @@ func (r *Route) GetQueriesTemplates() ([]string, error) {
 		return nil, r.err
 	}
 	if r.regexp.queries == nil {
-		return nil, errors.New("mux: route doesn't have queries")
+		return nil, errors.New("sonate: route doesn't have queries")
 	}
 	queries := make([]string, 0, len(r.regexp.queries))
 	for _, query := range r.regexp.queries {
@@ -696,7 +696,7 @@ func (r *Route) GetMethods() ([]string, error) {
 			return []string(methods), nil
 		}
 	}
-	return nil, errors.New("mux: route doesn't have methods")
+	return nil, errors.New("sonate: route doesn't have methods")
 }
 
 // GetHostTemplate returns the template used to build the
@@ -709,7 +709,7 @@ func (r *Route) GetHostTemplate() (string, error) {
 		return "", r.err
 	}
 	if r.regexp.host == nil {
-		return "", errors.New("mux: route doesn't have a host")
+		return "", errors.New("sonate: route doesn't have a host")
 	}
 	return r.regexp.host.template, nil
 }
